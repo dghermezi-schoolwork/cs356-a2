@@ -16,6 +16,7 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.JTextPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
@@ -78,42 +79,82 @@ public class AdminControlPanel {
 			}
 		});
 
-		btnNewButton_1 = new JButton("Open User View");
-		btnNewButton_1.setBounds(270, 119, 415, 44);
-		frmAdmin.getContentPane().add(btnNewButton_1);
+		btnOpenUserView = new JButton("Open User View");
+		btnOpenUserView.setBounds(270, 119, 415, 44);
+		frmAdmin.getContentPane().add(btnOpenUserView);
+		btnOpenUserView.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openUserView();
+
+			}
+
+		});
 
 		btnShowPositivePercentage = new JButton("Show Positive Percentage");
 		btnShowPositivePercentage.setBounds(484, 380, 201, 44);
 		frmAdmin.getContentPane().add(btnShowPositivePercentage);
+		btnShowPositivePercentage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				numberOfPositiveTweets();
+
+			}
+		});
 
 		btnShowMessagesTotal = new JButton("Show Messages Total");
 		btnShowMessagesTotal.setBounds(270, 380, 201, 44);
 		frmAdmin.getContentPane().add(btnShowMessagesTotal);
+		btnShowMessagesTotal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				numberOfTweets();
+			}
+		});
 
 		btnShowUserTotal = new JButton("Show User Total");
 		btnShowUserTotal.setBounds(270, 325, 201, 44);
 		frmAdmin.getContentPane().add(btnShowUserTotal);
+		btnShowUserTotal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				numberOfUsers();
+
+			}
+		});
 
 		btnShowGroupTotal = new JButton("Show Group Total");
 		btnShowGroupTotal.setBounds(481, 325, 201, 44);
 		frmAdmin.getContentPane().add(btnShowGroupTotal);
+		btnShowGroupTotal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				numberOfGroups();
+
+			}
+		});
 
 	}
 
 	private JTextField txtUserId;
 	private JTextField txtGroupId;
 	private JButton btnAddGroup;
-	private JButton btnNewButton_1;
+	private JButton btnOpenUserView;
 	private JButton btnShowPositivePercentage;
 	private JButton btnShowMessagesTotal;
 	private JButton btnShowUserTotal;
 	private JButton btnShowGroupTotal;
 
+	private void expandAllNodes(JTree tree, int startingIndex, int rowCount) {
+		for (int i = startingIndex; i < rowCount; ++i) {
+			tree.expandRow(i);
+		}
+
+		if (tree.getRowCount() != rowCount) {
+			expandAllNodes(tree, rowCount, tree.getRowCount());
+		}
+	}
+
 	private AdminControlPanel() {
 		tree = new ArrayList<UserComponent>();
 		tree.add(new UserGroup("Root"));
 		userCount = 0;
-		groupCount = 1;
+		groupCount = 0;
 
 		initialize();
 	}
@@ -130,10 +171,12 @@ public class AdminControlPanel {
 	}
 
 	public int numberOfUsers() {
+		JOptionPane.showMessageDialog(frmAdmin, "Total users: " + userCount);
 		return userCount;
 	}
 
 	public int numberOfGroups() {
+		JOptionPane.showMessageDialog(frmAdmin, "Total groups: " + groupCount);
 		return groupCount;
 	}
 
@@ -144,6 +187,7 @@ public class AdminControlPanel {
 				count += ((User) uc).getMessages().size();
 			}
 		}
+		JOptionPane.showMessageDialog(frmAdmin, "Total messages: " + count);
 		return count;
 	}
 
@@ -161,12 +205,15 @@ public class AdminControlPanel {
 				}
 			}
 		}
+
+		JOptionPane.showMessageDialog(frmAdmin, "Positive messages: " + count);
 		return count;
 	}
 
 	public void addUser(String userID, UserGroup group) {
 		for (UserComponent uc : tree) {
 			if (uc.getID().equals(userID)) {
+				JOptionPane.showMessageDialog(frmAdmin, "User already exists!");
 				System.out.println("User already exists!");
 				return;
 			}
@@ -177,7 +224,7 @@ public class AdminControlPanel {
 		updateTree(newUser, group);
 		userCount++;
 	}
-	
+
 	public void addUser(String userID) {
 		DefaultMutableTreeNode selection = (DefaultMutableTreeNode) tree_1.getLastSelectedPathComponent();
 		if (selection instanceof User) {
@@ -193,6 +240,7 @@ public class AdminControlPanel {
 		for (UserComponent uc : tree) {
 			if (uc.getID().equals(groupID)) {
 				System.out.println("Group already exists!");
+				JOptionPane.showMessageDialog(frmAdmin, "Group already exists!");
 				return;
 			}
 		}
@@ -202,7 +250,7 @@ public class AdminControlPanel {
 		groupCount++;
 		updateTree(newGroup, group);
 	}
-	
+
 	public void addGroup(String groupID) {
 		DefaultMutableTreeNode selection = (DefaultMutableTreeNode) tree_1.getLastSelectedPathComponent();
 		if (selection instanceof User) {
@@ -217,5 +265,33 @@ public class AdminControlPanel {
 		parent.add((DefaultMutableTreeNode) child);
 		DefaultTreeModel model = new DefaultTreeModel((DefaultMutableTreeNode) tree.get(0));
 		tree_1.setModel(model);
+		expandAllNodes(tree_1, 0, tree_1.getRowCount());
+	}
+
+	private void openUserView() {
+		DefaultMutableTreeNode selection = (DefaultMutableTreeNode) tree_1.getLastSelectedPathComponent();
+		if (!(selection instanceof User)) {
+			JOptionPane.showMessageDialog(frmAdmin, "Please select a user before clicking this button!");
+			return;
+		} else {
+			UserGUI gui = ((User) selection).getGUI();
+			if (((User) selection).getGUI() == null) {
+				gui = new UserGUI((User) selection);
+			}
+
+			gui.frmUserGUI.setVisible(true);
+		}
+
+	}
+
+	public User check(String id) {
+		for (UserComponent uc : tree) {
+			if (uc instanceof User) {
+				if (uc.getID().equals(id)) {
+					return (User) uc;
+				}
+			}
+		}
+		return null;
 	}
 }

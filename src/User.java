@@ -6,6 +6,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 // Part of the composite pattern, as well as observer pattern
 public class User extends DefaultMutableTreeNode implements UserComponent, Subject, Observer {
 	private String id;
+	private UserGUI gui;
+
 	private List<Observer> followers;
 	private List<Subject> followings;
 	private List<Tweet> messages;
@@ -43,8 +45,13 @@ public class User extends DefaultMutableTreeNode implements UserComponent, Subje
 	}
 
 	public void follow(User user) {
-		followings.add(user);
-		user.register(this);
+		for (Subject subject : followings) {
+			if (subject != user && !(((User) subject).getID().equals(user.getID()))) {
+				followings.add(user);
+				user.register(this);
+			}
+		}
+
 	}
 
 	public void register(Observer o) {
@@ -62,10 +69,17 @@ public class User extends DefaultMutableTreeNode implements UserComponent, Subje
 	public void update(Tweet tweet) {
 		newsfeed.add(tweet);
 	}
-	
+
 	public String toString() {
 		return id;
 	}
 
+	public void setGUI(UserGUI gui) {
+		this.gui = gui;
+	}
+
+	public UserGUI getGUI() {
+		return gui;
+	}
 
 }
