@@ -2,10 +2,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -16,10 +20,17 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 
 // Singleton pattern
+// NOTE: Used WindowBuilder to generate some of the Swing code
 public class AdminControlPanel {
 
 	JFrame frmAdmin;
 	private JTree tree_1;
+	private static AdminControlPanel instance = null;
+	private List<UserComponent> tree;
+
+	private int userCount;
+	private int groupCount;
+	private final String[] POSITIVE_WORDS = { "good", "great", "excellent" };
 
 	/**
 	 * Initialize the contents of the frame.
@@ -36,43 +47,67 @@ public class AdminControlPanel {
 		tree_1.setModel(model);
 		tree_1.setBounds(10, 11, 250, 413);
 		frmAdmin.getContentPane().add(tree_1);
-		
+
 		txtUserId = new JTextField();
 		txtUserId.setText("User ID");
 		txtUserId.setBounds(270, 9, 204, 44);
 		frmAdmin.getContentPane().add(txtUserId);
 		txtUserId.setColumns(10);
-		
-		JButton btnNewButton = new JButton("Add User");
-		btnNewButton.setBounds(484, 8, 201, 44);
-		frmAdmin.getContentPane().add(btnNewButton);
-		
+
+		JButton btnAddUser = new JButton("Add User");
+		btnAddUser.setBounds(484, 8, 201, 44);
+		frmAdmin.getContentPane().add(btnAddUser);
+		btnAddUser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addUser(txtUserId.getText());
+			}
+		});
+
 		txtGroupId = new JTextField();
 		txtGroupId.setText("Group ID");
 		txtGroupId.setBounds(270, 64, 204, 44);
 		frmAdmin.getContentPane().add(txtGroupId);
 		txtGroupId.setColumns(10);
-		
+
 		btnAddGroup = new JButton("Add Group");
 		btnAddGroup.setBounds(484, 63, 201, 44);
 		frmAdmin.getContentPane().add(btnAddGroup);
-		
-//		DefaultTreeModel model1 = new DefaultTreeModel(new UserGroup("TEST"));
-//		tree_1.setModel(model1);
-//		tree_1.setBounds(10, 11, 250, 413);
-//		frmAdmin.getContentPane().add(tree_1);
+		btnAddGroup.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addGroup(txtGroupId.getText());
+			}
+		});
+
+		btnNewButton_1 = new JButton("Open User View");
+		btnNewButton_1.setBounds(270, 119, 415, 44);
+		frmAdmin.getContentPane().add(btnNewButton_1);
+
+		btnShowPositivePercentage = new JButton("Show Positive Percentage");
+		btnShowPositivePercentage.setBounds(484, 380, 201, 44);
+		frmAdmin.getContentPane().add(btnShowPositivePercentage);
+
+		btnShowMessagesTotal = new JButton("Show Messages Total");
+		btnShowMessagesTotal.setBounds(270, 380, 201, 44);
+		frmAdmin.getContentPane().add(btnShowMessagesTotal);
+
+		btnShowUserTotal = new JButton("Show User Total");
+		btnShowUserTotal.setBounds(270, 325, 201, 44);
+		frmAdmin.getContentPane().add(btnShowUserTotal);
+
+		btnShowGroupTotal = new JButton("Show Group Total");
+		btnShowGroupTotal.setBounds(481, 325, 201, 44);
+		frmAdmin.getContentPane().add(btnShowGroupTotal);
+
 	}
 
-	private static AdminControlPanel instance = null;
-	private List<UserComponent> tree;
-
-	private int userCount;
-	private int groupCount;
-
-	private final String[] POSITIVE_WORDS = { "good", "great", "excellent" };
 	private JTextField txtUserId;
 	private JTextField txtGroupId;
 	private JButton btnAddGroup;
+	private JButton btnNewButton_1;
+	private JButton btnShowPositivePercentage;
+	private JButton btnShowMessagesTotal;
+	private JButton btnShowUserTotal;
+	private JButton btnShowGroupTotal;
 
 	private AdminControlPanel() {
 		tree = new ArrayList<UserComponent>();
@@ -131,7 +166,7 @@ public class AdminControlPanel {
 
 	public void addUser(String userID, UserGroup group) {
 		for (UserComponent uc : tree) {
-			if (uc.getID() == userID) {
+			if (uc.getID().equals(userID)) {
 				System.out.println("User already exists!");
 				return;
 			}
@@ -142,11 +177,21 @@ public class AdminControlPanel {
 		updateTree(newUser, group);
 		userCount++;
 	}
+	
+	public void addUser(String userID) {
+		DefaultMutableTreeNode selection = (DefaultMutableTreeNode) tree_1.getLastSelectedPathComponent();
+		if (selection instanceof User) {
+			selection = (DefaultMutableTreeNode) selection.getParent();
+		} else if (!(selection instanceof UserGroup)) {
+			selection = (DefaultMutableTreeNode) tree.get(0);
+		}
+		addUser(userID, (UserGroup) selection);
+	}
 
 	public void addGroup(String groupID, UserGroup group) {
 
 		for (UserComponent uc : tree) {
-			if (uc.getID() == groupID) {
+			if (uc.getID().equals(groupID)) {
 				System.out.println("Group already exists!");
 				return;
 			}
@@ -158,6 +203,16 @@ public class AdminControlPanel {
 		updateTree(newGroup, group);
 	}
 	
+	public void addGroup(String groupID) {
+		DefaultMutableTreeNode selection = (DefaultMutableTreeNode) tree_1.getLastSelectedPathComponent();
+		if (selection instanceof User) {
+			selection = (DefaultMutableTreeNode) selection.getParent();
+		} else if (!(selection instanceof UserGroup)) {
+			selection = (DefaultMutableTreeNode) tree.get(0);
+		}
+		addGroup(groupID, (UserGroup) selection);
+	}
+
 	public void updateTree(UserComponent child, UserGroup parent) {
 		parent.add((DefaultMutableTreeNode) child);
 		DefaultTreeModel model = new DefaultTreeModel((DefaultMutableTreeNode) tree.get(0));
