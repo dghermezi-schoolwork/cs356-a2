@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.ListModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 // Part of the composite pattern, as well as observer pattern
@@ -68,6 +71,12 @@ public class User extends DefaultMutableTreeNode implements UserComponent, Subje
 
 	public void update(Tweet tweet) {
 		newsfeed.add(tweet);
+		ListModel lm = new DefaultListModel();
+		for (int i = newsfeed.size() - 1; i >= 0; i++) {
+			((DefaultListModel) lm).addElement(newsfeed.get(i));
+		}
+
+		this.getGUI().newsFeed = new JList(lm);
 	}
 
 	public String toString() {

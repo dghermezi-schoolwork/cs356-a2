@@ -17,4 +17,8 @@ public class Tweet {
 		return owner;
 	}
 	
+	public String toString() {
+		return owner.getID() + ": " + message;
+	}
+	
 }
