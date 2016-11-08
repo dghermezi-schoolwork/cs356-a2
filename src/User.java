@@ -44,6 +44,10 @@ public class User extends DefaultMutableTreeNode implements UserComponent, Subje
 	public List<Observer> getFollowers() {
 		return followers;
 	}
+	
+	public List<Subject> getFollowings() {
+		return followings;
+	}
 
 	public void setGUI(UserGUI gui) {
 		this.gui = gui;
@@ -63,12 +67,14 @@ public class User extends DefaultMutableTreeNode implements UserComponent, Subje
 	public void follow(User user) {
 		for (Subject subject : followings) {
 			// make sure observer isn't already following the subject
-			if (subject != user && !(((User) subject).getID().equals(user.getID()))) {
-				// add it to the followings and register the observer
-				followings.add(user);
-				user.register(this);
+			if (subject == user || (((User) subject).getID().equals(user.getID()))) {
+				return;
 			}
 		}
+		followings.add(user);
+		user.register(this);
+		this.getGUI().updateFollowings();
+		
 	}
 
 	// part of the observer pattern, registers a new observer.
@@ -90,13 +96,15 @@ public class User extends DefaultMutableTreeNode implements UserComponent, Subje
 	// part of the observer pattern
 	// when a new tweet is pushed to the observer, update the newsfeed.
 	public void update(Tweet tweet) {
-		newsfeed.add(tweet);
-		ListModel lm = new DefaultListModel();
-		for (int i = newsfeed.size() - 1; i >= 0; i++) {
-			((DefaultListModel) lm).addElement(newsfeed.get(i));
+		newsfeed.add(0, tweet);
+		UserGUI gui = this.getGUI();
+		if (gui == null) {
+			gui = new UserGUI(this);
+			this.setGUI(gui);
 		}
+		gui.updateNewsFeed();
 
-		this.getGUI().newsFeed = new JList(lm);
+		
 	}
 
 	public String toString() {

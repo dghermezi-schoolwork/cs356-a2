@@ -155,7 +155,7 @@ public class AdminControlPanel {
 		frmAdmin.getContentPane().add(btnShowMessagesTotal);
 		btnShowMessagesTotal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				numberOfTweets();
+				JOptionPane.showMessageDialog(frmAdmin, "Total messages: " + numberOfTweets());
 			}
 		});
 
@@ -214,7 +214,6 @@ public class AdminControlPanel {
 				count += ((User) uc).getMessages().size();
 			}
 		}
-		JOptionPane.showMessageDialog(frmAdmin, "Total messages: " + count);
 		return count;
 	}
 
@@ -235,7 +234,12 @@ public class AdminControlPanel {
 			}
 		}
 
-		JOptionPane.showMessageDialog(frmAdmin, "Positive messages: " + count);
+		double percent = 0;
+		if (count != 0) {
+			percent = count / numberOfTweets();
+			percent = Math.round(count * 10000.0 / numberOfTweets()) / 100.0;
+		}
+		JOptionPane.showMessageDialog(frmAdmin, "Positive messages: " + count + "\nPercantage: " + percent + "%");
 		return count;
 	}
 
@@ -281,10 +285,9 @@ public class AdminControlPanel {
 		userCount++;
 	}
 
-	
-	
-	// these next two methods are the same as the previous two, but for creating groups instead of users.
-	 
+	// these next two methods are the same as the previous two, but for creating
+	// groups instead of users.
+
 	public void addGroup(String groupID) {
 		DefaultMutableTreeNode selection = (DefaultMutableTreeNode) jtree.getLastSelectedPathComponent();
 		if (selection instanceof User) {
@@ -294,7 +297,7 @@ public class AdminControlPanel {
 		}
 		addGroup(groupID, (UserGroup) selection);
 	}
-		
+
 	public void addGroup(String groupID, UserGroup group) {
 		for (UserComponent uc : tree) {
 			if (uc.getID().equals(groupID)) {
@@ -309,11 +312,11 @@ public class AdminControlPanel {
 		groupCount++;
 		updateTree(newGroup, group);
 	}
-	
 
-	
-	// adds the child to the parent. child can be a new group or user, parent must be a group
-	// this updates the JTree and expands the nodes to reflect the changes in the GUI.
+	// adds the child to the parent. child can be a new group or user, parent
+	// must be a group
+	// this updates the JTree and expands the nodes to reflect the changes in
+	// the GUI.
 	public void updateTree(UserComponent child, UserGroup parent) {
 		parent.add((DefaultMutableTreeNode) child);
 		DefaultTreeModel model = new DefaultTreeModel((DefaultMutableTreeNode) tree.get(0));
@@ -328,14 +331,18 @@ public class AdminControlPanel {
 		if (!(selection instanceof User)) {
 			JOptionPane.showMessageDialog(frmAdmin, "Please select a user before clicking this button!");
 			return;
-		// get/create a gui for that specific user.	
+			// get/create a gui for that specific user.
 		} else {
 			UserGUI gui = ((User) selection).getGUI();
+
+			// if a gui hasnt been created for user, make one
 			if (((User) selection).getGUI() == null) {
 				gui = new UserGUI((User) selection);
+				((User) selection).setGUI(gui);
 			}
+
 			// and make it visible (open a new window)
-			gui.frmUserGUI.setVisible(true);
+			((User) selection).getGUI().getJFrame().setVisible(true);
 		}
 
 	}
