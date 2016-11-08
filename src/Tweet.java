@@ -1,4 +1,6 @@
 
+// This is a Tweet object. Contains the message as well as the owner
+// Could later add more stats, like time of tweet.
 public class Tweet {
 
 	private String message;
