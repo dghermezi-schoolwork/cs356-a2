@@ -6,9 +6,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import com.sun.xml.internal.ws.api.Component;
 
 // Part of composite pattern
+// represents a group
 public class UserGroup extends DefaultMutableTreeNode implements UserComponent {
 
-	
 	private String id;
 	private List<UserComponent> members;
 
@@ -28,7 +28,7 @@ public class UserGroup extends DefaultMutableTreeNode implements UserComponent {
 	public void addToGroup(UserComponent uc) {
 		members.add(uc);
 	}
-	
+
 	public String toString() {
 		return id;
 	}
